@@ -3,3 +3,7 @@ node_modules/
 .next/
 dist/
 .DS_Store
+.env
+node_modules
+dist
+.next
