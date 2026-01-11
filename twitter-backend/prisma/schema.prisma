@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  username     String   @unique
+  password     String
+  name         String?
+  bio          String?
+  location     String?
+  profileImage String?
+  coverImage   String?
+  createdAt    DateTime @default(now())
+
+  tweets       Tweet[]
+  likes        Like[]
+  
+  // Follow систем
+  followers    Follows[] @relation("following")
+  following    Follows[] @relation("follower")
+
+  // Нотификации
+  notifications       Notification[] @relation("UserNotifications")
+  issuedNotifications Notification[] @relation("IssuerNotifications")
+}
+
+model Tweet {
+  id        Int      @id @default(autoincrement())
+  content   String
+  image     String?
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+
+  notifications Notification[]
+  // Replies (самореференца)
+  parentId  Int?
+  parent    Tweet?   @relation("TweetReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Tweet[]  @relation("TweetReplies")
+
+  likes     Like[]
+  retweetId Int?
+  retweet   Tweet?   @relation("Retweets", fields: [retweetId], references: [id])
+  retweets  Tweet[]  @relation("Retweets")
+}
+
+model Like {
+  id      Int   @id @default(autoincrement())
+  userId  Int
+  tweetId Int
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tweet   Tweet @relation(fields: [tweetId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tweetId]) // Оневозможува дупли лајкови
+}
+
+model Follows {
+  followerId  Int
+  followingId Int
+  follower    User @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+}
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  type      NotificationType
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  // Примач на нотификацијата
+  userId    Int
+  user      User             @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Иницијатор (оној кој ја предизвикал акцијата)
+  issuerId  Int
+  issuer    User             @relation("IssuerNotifications", fields: [issuerId], references: [id], onDelete: Cascade)
+
+  // Поврзан твит (ако има)
+  tweetId   Int?
+  tweet     Tweet?           @relation(fields: [tweetId], references: [id], onDelete: SetNull)
+}
+
+enum NotificationType {
+  FOLLOW
+  LIKE
+  REPLY
+}

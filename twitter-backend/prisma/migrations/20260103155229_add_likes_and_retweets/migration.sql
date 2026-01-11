@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Tweet" ADD COLUMN     "likesCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "retweetCount" INTEGER NOT NULL DEFAULT 0;

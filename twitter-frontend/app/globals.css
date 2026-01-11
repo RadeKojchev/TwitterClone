@@ -1,0 +1,63 @@
+/* @import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+} */
+
+
+@import "tailwindcss";
+
+@theme {
+  /* Дефинираме сопствени системски бои за Tailwind v4 */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-border: var(--border);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+  --border: #eff3f4; /* Светла линија */
+  color-scheme: light;
+}
+
+/* Ова е клучниот дел за копчето да работи во Tailwind v4 */
+.dark {
+  --background: #000000;
+  --foreground: #ffffff;
+  --border: #2f3336; /* Темна линија како на Twitter */
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased min-h-screen;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* Ги ресетираме сите бордери да ја користат нашата променлива */
+  * {
+    @apply border-[var(--border)];
+  }
+}
